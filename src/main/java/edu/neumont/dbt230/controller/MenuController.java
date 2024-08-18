@@ -25,6 +25,9 @@ public class MenuController {
                     String fName = Display.getFirstName();
                     String lName = Display.getLastName();
                     int hireYear = Display.getHireYear();
+                    TxtConversion.writeJsonFile("", formatEmployeeContents(fName, lName, hireYear));
+                    MongoInteraction.insertOneDocument();
+
                     //FileManipulator.createFile(formatEmployeeContents(fName, lName, hireYear));
                     break;
                 case 2: // 2. Update an employee file
