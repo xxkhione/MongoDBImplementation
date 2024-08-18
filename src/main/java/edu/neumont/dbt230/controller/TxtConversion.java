@@ -84,7 +84,10 @@ public class TxtConversion {
         return null;
     }
     public static void createBulkJsonFile(String contents) {
-        String path = JSON_PATH + "/" + "people.json";
+        writeJsonFile("people", contents);
+    }
+    private static void writeJsonFile(String id, String contents) {
+        String path = FILE_PATH + "/" + id + ".json";
         BufferedWriter bWriter = null;
         try {
             bWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path)));
@@ -97,5 +100,4 @@ public class TxtConversion {
             }
         } catch (IOException ioe) {}
     }
-
 }
