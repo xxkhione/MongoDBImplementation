@@ -12,7 +12,7 @@ import edu.neumont.dbt230.controller.TxtConversion;
 import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         //TxtConversion.convertTxtToJson();
         //MongoInteraction.insertManyDocuments(TxtConversion.JSON_PATH + "/people.json");
     }

@@ -86,7 +86,7 @@ public class TxtConversion {
     public static void createBulkJsonFile(String contents) {
         writeJsonFile("people", contents);
     }
-    private static void writeJsonFile(String id, String contents) {
+    public static void writeJsonFile(String id, String contents) {
         String path = FILE_PATH + "/" + id + ".json";
         BufferedWriter bWriter = null;
         try {
