@@ -16,16 +16,25 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static com.mongodb.client.model.Accumulators.max;
+import static com.mongodb.client.model.Aggregates.group;
+import static com.mongodb.client.model.Aggregates.project;
+import static com.mongodb.client.model.Projections.fields;
+import static com.mongodb.client.model.Projections.include;
 
 public class MongoInteraction {
     public static final String DATABASE_NAME = "DBT230";
     public static final String COLLECTION_NAME = "people";
     public static final String MONGO_URI = "mongodb+srv://dev:dev@cluster.xrzowho.mongodb.net/?retryWrites=true&w=majority&appName=Cluster";
+    public static int maxID;
 
     //Connection method given by MongoDB
     public static void mongoTestConnection() {
@@ -69,6 +78,19 @@ public class MongoInteraction {
         MongoClient mongoClient = MongoClients.create(MONGO_URI);
         MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME, Document.class);
         collection.insertOne(Document.parse(json));
+        mongoClient.close();
+    }
+
+    public static void findMaxID(){
+        MongoClient mongoClient = MongoClients.create(MONGO_URI);
+        MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
+
+        //Aggregate pipeline
+        Bson grouping = group(null, max("maxID", "$id"));
+        Bson projectStage = project(fields(include("maxID")));
+
+        Document result = collection.aggregate(Arrays.asList(grouping, projectStage)).first();
+        maxID = result.getInteger("maxID");
         mongoClient.close();
     }
 }
