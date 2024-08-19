@@ -7,7 +7,6 @@
 package edu.neumont.dbt230.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.neumont.dbt230.model.Employee;
 

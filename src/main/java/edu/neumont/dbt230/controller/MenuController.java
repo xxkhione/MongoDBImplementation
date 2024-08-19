@@ -12,12 +12,12 @@ import edu.neumont.dbt230.view.Display;
 import java.util.List;
 
 public class MenuController {
-    public void run() {
+    public static void run() {
+        MongoInteraction.findMaxID();
         long startTime;
         long endTime;
         do{
             startTime = System.nanoTime();
-            //FileManipulator.createIndexes();
             Display.welcomeMsg();
             int selection = Display.mainMenu();
             switch(selection) {
@@ -25,10 +25,9 @@ public class MenuController {
                     String fName = Display.getFirstName();
                     String lName = Display.getLastName();
                     int hireYear = Display.getHireYear();
-                    TxtConversion.writeJsonFile("", formatEmployeeContents(fName, lName, hireYear));
-                    MongoInteraction.insertOneDocument();
-
-                    //FileManipulator.createFile(formatEmployeeContents(fName, lName, hireYear));
+                    Employee newEmployee = new Employee(MongoInteraction.maxID, fName, lName, hireYear);
+                    MongoInteraction.insertOneDocument(TxtConversion.getSingleJsonInfo(newEmployee));
+                    MongoInteraction.maxID++;
                     break;
                 case 2: // 2. Update an employee file
                     int id = Display.getIDSearch();
@@ -36,49 +35,49 @@ public class MenuController {
                     switch(option) {
                         case 1: // First Name
                             String updatedFirstName = Display.updateFirstName();
-                            //FileManipulator.updateFile(id, option, updatedFirstName);
+                            MongoInteraction.updateEmployee(id, option, updatedFirstName);
                             break;
                         case 2: // Last Name
                             String updatedLastName = Display.updateLastName();
-                            //FileManipulator.updateFile(id, option, updatedLastName);
+                            MongoInteraction.updateEmployee(id, option, updatedLastName);
                             break;
                         case 3: // Hire Year
                             int updatedHireYear = Display.updateHireYear();
-                            //FileManipulator.updateFile(id, option, String.valueOf(updatedHireYear));
+                            MongoInteraction.updateEmployee(id, option, String.valueOf(updatedHireYear));
                             break;
                     }
                     break;
                 case 3: // 3. Delete an employee file
                     int idDelete = Display.getIDSearch();
-                    //FileManipulator.deleteFile(idDelete);
+                    MongoInteraction.deleteEmployee(idDelete);
                     break;
                 case 4: // 4. Search for an employee
                     int searchOption = Display.searchMenu();
                     switch(searchOption){
                         case 1: //search by ID
-//                            int searchID = Display.getIDSearch();
-//                            //Employee searchedEmployee = FileManipulator.searchById(searchID);
-//                            if(searchedEmployee != null){
-//                                Display.printSingleEmployee(searchedEmployee);
-//                            } else { Display.errorMsg(); }
-//                            break;
-//                        case 2: //search by last name
-//                            String lastName = Display.getLastName();
-//                            //List<Employee> employeesWithLastName = FileManipulator.searchByLastName(lastName);
-//                            if(employeesWithLastName != null){
-//                                Display.printEmployeesWithGivenLastName(employeesWithLastName);
-//                            } else { Display.errorMsg(); }
-//                            break;
+                            int searchID = Display.getIDSearch();
+                            Employee searchedEmployee = MongoInteraction.searchForID(searchID);
+                            if(searchedEmployee != null){
+                                Display.printSingleEmployee(searchedEmployee);
+                            } else { Display.errorMsg(); }
+                            break;
+                        case 2: //search by last name
+                            String lastName = Display.getLastName();
+                            List<Employee> employeesWithLastName = MongoInteraction.searchForLastName(lastName);
+                            if(employeesWithLastName != null){
+                                Display.printEmployeesWithGivenLastName(employeesWithLastName);
+                            } else { Display.errorMsg(); }
+                            break;
                     }
                     break;
                 case 5: // 5. View all employees
                     int choice = Display.displayMenu();
                     switch(choice){
                         case 1: //Display by ID
-                           // Display.printIdIndexEmployees();
+                            Display.printIdIndexEmployees();
                             break;
                         case 2: //Display by Last Name
-                            //Display.printLastNameIndexEmployees();
+                            Display.printLastNameIndexEmployees();
                             break;
                         case 3: //Display unsorted employees
                             Display.printEmployees();
@@ -92,13 +91,5 @@ public class MenuController {
             endTime = System.nanoTime();
             Display.printTimeTakenToExecute((endTime - startTime));
         } while(true);
-    }
-
-    private String formatEmployeeContents(String firstName, String lastName, int hireYear){
-        StringBuilder contents = new StringBuilder();
-        contents.append(firstName + ", ");
-        contents.append(lastName + ", ");
-        contents.append(hireYear);
-        return contents.toString();
     }
 }

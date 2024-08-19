@@ -11,10 +11,11 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
 import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.Updates;
+import edu.neumont.dbt230.model.Employee;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -59,12 +60,13 @@ public class MongoInteraction {
         }
     }
 
+    //Got help from Gemini with this one since it includes JsonNode
     public static void insertManyDocuments(String json) throws IOException {
         JsonNode rootNode = TxtConversion.objectMapper.readTree(new File(json));
 
         List<Document> documents = new ArrayList<>();
-        if(rootNode.isArray()){
-            for(JsonNode node : rootNode){
+        if (rootNode.isArray()) {
+            for (JsonNode node : rootNode) {
                 documents.add(Document.parse(node.toString()));
             }
         }
@@ -81,7 +83,70 @@ public class MongoInteraction {
         mongoClient.close();
     }
 
-    public static void findMaxID(){
+    public static void updateEmployee(int id, int option, String updatedValue) {
+        MongoClient mongoClient = MongoClients.create(MONGO_URI);
+        MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
+
+        switch (option) {
+            case 1: //updates the first name
+                collection.updateOne(Filters.eq("id", id), Updates.set("firstName", updatedValue));
+                break;
+            case 2: //updates the last name
+                collection.updateOne(Filters.eq("id", id), Updates.set("lastName", updatedValue));
+                break;
+            case 3: //updates the hire year
+                collection.updateOne(Filters.eq("id", id), Updates.set("hireYear", Integer.parseInt(updatedValue)));
+                break;
+        }
+
+        mongoClient.close();
+    }
+
+    public static void deleteEmployee(int id) {
+        MongoClient mongoClient = MongoClients.create(MONGO_URI);
+        MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
+
+        collection.deleteOne(Filters.eq("id", id));
+        mongoClient.close();
+    }
+
+    public static Employee searchForID(int id) {
+        MongoClient mongoClient = MongoClients.create(MONGO_URI);
+        MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
+        Document employee = collection.find(Filters.eq("id", id)).first();
+
+        if (employee != null) {
+            int eId = employee.getInteger("id");
+            String eFirstName = employee.getString("firstName");
+            String eLastName = employee.getString("lastName");
+            int eHireYear = employee.getInteger("hireYear");
+            Employee foundEmployee = new Employee(eId, eFirstName, eLastName, eHireYear);
+            return foundEmployee;
+        }
+        return null;
+    }
+
+    public static List<Employee> searchForLastName(String lastName) {
+        MongoClient mongoClient = MongoClients.create(MONGO_URI);
+        MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
+        FindIterable<Document> employeesWithLastName = collection.find(Filters.eq("lastName", lastName));
+
+        if (employeesWithLastName != null) {
+            List<Employee> employees = new ArrayList();
+            for (Document employee : employeesWithLastName) {
+                int eId = employee.getInteger("id");
+                String eFirstName = employee.getString("firstName");
+                String eLastName = employee.getString("lastName");
+                int eHireYear = employee.getInteger("hireYear");
+                Employee foundEmployee = new Employee(eId, eFirstName, eLastName, eHireYear);
+                employees.add(foundEmployee);
+            }
+            return employees;
+        }
+        return null;
+    }
+
+    public static void findMaxID() {
         MongoClient mongoClient = MongoClients.create(MONGO_URI);
         MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
 
@@ -92,5 +157,47 @@ public class MongoInteraction {
         Document result = collection.aggregate(Arrays.asList(grouping, projectStage)).first();
         maxID = result.getInteger("maxID");
         mongoClient.close();
+    }
+
+    public static void createIndexes() {
+        MongoClient mongoClient = MongoClients.create(MONGO_URI);
+        MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
+        collection.createIndex(Indexes.ascending("id", "lastName"));
+        mongoClient.close();
+    }
+
+    public static List<Employee> getEmployeesByLastName() {
+        MongoClient mongoClient = MongoClients.create(MONGO_URI);
+        MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
+        Bson filterIndex = Filters.exists("lastName");
+        FindIterable<Document> allEmployeesByLastName = collection.find(filterIndex);
+
+        List<Employee> employees = new ArrayList();
+        for (Document employee : allEmployeesByLastName) {
+            int eId = employee.getInteger("id");
+            String eFirstName = employee.getString("firstName");
+            String eLastName = employee.getString("lastName");
+            int eHireYear = employee.getInteger("hireYear");
+            Employee foundEmployee = new Employee(eId, eFirstName, eLastName, eHireYear);
+            employees.add(foundEmployee);
+        }
+        return employees;
+    }
+    public static List<Employee> getEmployeesByID() {
+        MongoClient mongoClient = MongoClients.create(MONGO_URI);
+        MongoCollection<Document> collection = mongoClient.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME);
+        Bson filterIndex = Filters.exists("id");
+        FindIterable<Document> allEmployeesByid = collection.find(filterIndex);
+
+        List<Employee> employees = new ArrayList();
+        for (Document employee : allEmployeesByid) {
+            int eId = employee.getInteger("id");
+            String eFirstName = employee.getString("firstName");
+            String eLastName = employee.getString("lastName");
+            int eHireYear = employee.getInteger("hireYear");
+            Employee foundEmployee = new Employee(eId, eFirstName, eLastName, eHireYear);
+            employees.add(foundEmployee);
+        }
+        return employees;
     }
 }

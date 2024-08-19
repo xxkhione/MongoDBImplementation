@@ -6,11 +6,11 @@
  */
 package edu.neumont.dbt230.view;
 
+import edu.neumont.dbt230.controller.MongoInteraction;
 import edu.neumont.dbt230.controller.TxtConversion;
 import edu.neumont.dbt230.model.Employee;
 
 import java.util.List;
-import java.util.Map;
 
 public class Display {
     public static void welcomeMsg(){
@@ -86,24 +86,22 @@ public class Display {
             System.out.println("------------------------");
         }
     }
-//    public static void printIdIndexEmployees(){
-//        System.out.println("Printing employees by ID:");
-//        for(int i = 1; i < FileManipulator.idIndex.size(); i ++){
-//            System.out.println(FileManipulator.idIndex.get(i));
-//            System.out.println("------------------------");
-//        }
-//    }
-//    public static void printLastNameIndexEmployees(){
-//        System.out.println("Printing employees by last name");
-//        for(Map.Entry<String, List<Employee>> entry : FileManipulator.lastNameIndex.entrySet()){
-//            List<Employee> employees = entry.getValue();
-//
-//            System.out.println("------------------------");
-//            for(Employee employee : employees){
-//                System.out.println(employee.toString());
-//            }
-//        }
-//    }
+    public static void printIdIndexEmployees(){
+        System.out.println("Printing employees by ID:");
+        List<Employee> idIndex = MongoInteraction.getEmployeesByID();
+        for(int i = 1; i < idIndex.size(); i ++){
+            System.out.println(idIndex.get(i));
+            System.out.println("------------------------");
+        }
+    }
+    public static void printLastNameIndexEmployees(){
+        System.out.println("Printing employees by last name");
+        List<Employee> lastNameIndex = MongoInteraction.getEmployeesByLastName();
+        for(int i = 1; i < lastNameIndex.size(); i++){
+            System.out.println(lastNameIndex.get(i));
+            System.out.println("------------------------");
+        }
+    }
     public static void printEmployeesWithGivenLastName(List<Employee> employees){
         for(Employee employee : employees){
             printSingleEmployee(employee);
