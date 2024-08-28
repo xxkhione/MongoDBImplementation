@@ -25,7 +25,7 @@ public class MenuController {
                     String fName = Display.getFirstName();
                     String lName = Display.getLastName();
                     int hireYear = Display.getHireYear();
-                    Employee newEmployee = new Employee(MongoInteraction.maxID, fName, lName, hireYear);
+                    Employee newEmployee = new Employee(MongoInteraction.maxID + 1, fName, lName, hireYear);
                     MongoInteraction.insertOneDocument(TxtConversion.getSingleJsonInfo(newEmployee));
                     MongoInteraction.maxID++;
                     break;
